@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Snake Game</title>
+</head>
+<body>
+
+	<canvas height="500" width="500" id="ctx"
+	style="border: 2px solid #000000 ; margin-left: 33%"></canvas>
+
+
+	<script type="text/javascript">
+		
+		var ctx = document.getElementById('ctx').getContext('2d');
+
+		var WIDTH = 500;
+		var HEIGHT = 500;
+		var foodList;
+		var direction;
+		var isEaten = false;
+		var score = 0;
+		var gamePlaying = false;
+		var lose = false;
+		var isClicked = false;
+		var snakeBody = {
+			width:20,
+			height:20,
+			color: 'green'
+		};
+		var food = {
+			width:20,
+			height:20,
+			color:'orange',
+			x:Math.floor(Math.random()*48)*10,
+			y:Math.floor(Math.random()*48)*10
+		};
+
+		ctx.font = '20px Calibri';
+		ctx.fillText("Score : " + 0 ,400,25);
+		ctx.fillText("Click to start game",170,250);
+	
+		document.onkeydown = function(event){
+			// 0 - left
+			// 1 - up
+			// 2 - Right
+			// 3 - Down
+
+			if(event.keyCode == 37){
+				direction = 0;
+			}
+			if(event.keyCode == 38){
+				direction = 1;
+			}
+			if(event.keyCode == 39){
+				direction = 2;
+			}
+			if(event.keyCode == 40){
+				direction = 3;
+			}
+
+		};
+
+		stopInterval = function(){
+			var myInt = setInterval(updateSnakePosition,45);
+			clearInterval(myInt);
+		}
+
+		gameIsStarted = function(){
+			setInterval(updateSnakePosition,45);
+			gamePlaying = true;
+			isClicked = true;
+			startGame();
+		}
+		
+		document.getElementById('ctx').addEventListener("click",gameIsStarted);
+
+		drawLose = function(){
+			ctx.fillStyle = 'black';
+			ctx.fillText('YOU LOSE',170,250);
+		}
+
+		drawScore = function(){
+			ctx.save();
+			ctx.fillStyle = 'black';
+			ctx.fillText("Score : " + score ,400,25);
+			ctx.restore();
+		}
+
+
+		drawSnake = function(){
+			ctx.save();
+			for (var i=0;i<snakeList.length;i++){
+			if(i==0) ctx.fillStyle = 'black';
+			else ctx.fillStyle = snakeBody.color;
+			ctx.fillRect(snakeList[i].x,snakeList[i].y,snakeBody.width,snakeBody.height);
+			ctx.restore();
+			};
+		}
+
+		drawFood = function(){
+			ctx.save();
+			ctx.fillStyle = food.color;
+			ctx.fillRect(food.x,food.y,food.width,food.height);
+			ctx.restore();
+		}
+
+		checkSnakePosition = function(){
+			if(snakeList[0].x > 500)
+				snakeList[0].x = 0;
+
+			if(snakeList[0].x < 0)
+				snakeList[0].x = 500;
+
+			if(snakeList[0].y > 500)
+				snakeList[0].y = 0;
+
+			if(snakeList[0].y < 0 )
+				snakeList[0].y = 500;
+
+		}
+
+		updateSnakeList = function(){
+			for (var i = snakeList.length-1;i>=0;i--){
+				if(direction == 0){
+					if(i==0){
+						snakeList[i].x = snakeList[i].x -10;
+					}
+					else{
+					snakeList[i].x = snakeList[i-1].x;
+
+					snakeList[i].y = snakeList[i-1].y;
+
+					}
+				}
+
+				else if(direction == 1){
+					if(i==0){
+						snakeList[i].y = snakeList[i].y-10;
+					}
+					else{
+					snakeList[i].x = snakeList[i-1].x;
+					snakeList[i].y = snakeList[i-1].y;
+
+					}
+				}	
+
+				else if(direction == 2){
+					if(i==0){
+						snakeList[i].x = snakeList[i].x + 10;
+					}
+					else{
+						snakeList[i].y = snakeList[i-1].y;
+						snakeList[i].x = snakeList[i-1].x;
+					}
+				}
+
+				else if(direction == 3){
+					if(i==0){
+						snakeList[i].y = snakeList[i].y + 10;
+					}
+					else{
+					snakeList[i].x = snakeList[i-1].x;
+					snakeList[i].y = snakeList[i-1].y;
+					}
+				}	
+					
+			}
+			score = snakeList.length-3;
+		};
+
+
+		var checkEaten = function(){
+
+
+
+			if(direction==1 || direction==3){
+				if(snakeList[0].y == food.y){
+					if(snakeList[0].x>=food.x){
+						if(snakeList[0].x - food.x<=20) isEaten = true;
+					}
+					else {
+						if(food.x - snakeList[0].x<=20) isEaten = true;
+					}
+				}
+				
+			}
+				
+			if(direction==2){
+				if(snakeList[0].x+10 == food.x){
+					if(snakeList[0].y>=food.y){
+						if(snakeList[0].y-20 - food.y+20<20) isEaten = true;
+					}
+					else {
+						if(food.y-20 - snakeList[0].y+20<20) isEaten = true;
+					}
+				}
+			}
+
+			if(direction==0){
+				if(snakeList[0].x == food.x+10){
+					if(snakeList[0].y>=food.y){
+						if(snakeList[0].y-20 - food.y+20<20) isEaten = true;
+					}
+					else {
+						if(food.y-20 - snakeList[0].y+20<20) isEaten = true;
+					}
+				}
+			}
+
+
+
+
+
+	}	
+
+		var snakeRise = function(){
+			snakeList.push({x:snakeList[snakeList.length-1].x-20,
+							y:snakeList[snakeList.length-1].y});
+		}
+
+		var updateFoodPosition = function(){
+			food.x=Math.floor(Math.random()*48)*10;
+			food.y=Math.floor(Math.random()*48)*10;
+		}
+
+		var eatFood = function(){
+			if(isEaten){
+			 updateFoodPosition();
+			 snakeRise();
+			}
+			isEaten = false;
+		}
+
+
+
+		updateSnakePosition = function(){
+			if(gamePlaying){
+			ctx.clearRect(0,0,WIDTH,HEIGHT);
+			drawFood();
+			drawSnake();
+			drawScore();
+			checkSnakePosition();
+			updateSnakeList();
+			checkEaten();
+			eatFood();
+			}
+			else {
+				stopInterval();
+				document.getElementById('ctx').addEventListener("click",gameIsStarted);	
+			}
+		}	
+
+
+
+		startGame = function() {
+			snakeList = [
+			{x:220,y:200},
+			{x:210,y:200},
+			{x:200,y:200}
+			];
+
+			direction = 2;
+			document.getElementById('ctx').removeEventListener("click",gameIsStarted);	
+
+		}
+	</script>
+
+</body>
+</html>
